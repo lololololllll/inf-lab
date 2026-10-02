@@ -51,8 +51,8 @@ while True:
     print("Tax for this delivery:", tax)
     print("Current inventory:", inventory)
 
-    print("Total deliveries processed:", delivery_process)
-    generate_report(inventory, failed_entries)
+print("Total deliveries processed:", delivery_process)
+generate_report(inventory, failed_entries)
 
 
     
