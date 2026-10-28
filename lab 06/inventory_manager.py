@@ -3,6 +3,7 @@ from product import Product
 from inventory import Inventory
 
 inventory = Inventory()
+inventory.load_inventory()
 
 while True:
     print("\n===== INVENTORY MANAGEMENT SYSTEM =====")
@@ -62,8 +63,9 @@ while True:
             print("Product not found.")
 
     elif choice == "5":
-        print("Save function will be added in Step 4.")
+        inventory.save_inventory()
 
+        
     elif choice == "6":
         print("Exiting program.")
         break
