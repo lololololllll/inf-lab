@@ -22,5 +22,11 @@
         "name": "mousepad",
         "price": 10.0,
         "stock": 5
+    },
+    {
+        "id": "P005",
+        "name": "Monitor",
+        "price": 280.0,
+        "stock": 5
     }
 ]
