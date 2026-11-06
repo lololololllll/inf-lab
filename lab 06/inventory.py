@@ -64,44 +64,48 @@ class Inventory:
             print(f"Error saving inventory: {error}")
 
     def load_inventory(self):
+        print("Loading file:", os.path.abspath(self.filename))
+
         if not os.path.exists(self.filename):
-            print("No existing inventory file found.")
-            return
+            print("ERROR: Inventory file not found!")
+        return
 
-        try:
-            with open(self.filename, "r") as file:
-                data = json.load(file)
-            print("Loading file:", os.path.abspath(self.filename))
-            print("JSON data:", data)
-            print("Number of products:", len(data))
+    try:
+        with open(self.filename, "r") as file:
+            data = json.load(file)
 
-            for item in data:
-                if item["type"] == "physical":
-                    product = PhysicalProduct(
-                        item["id"],
-                        item["name"],
-                        item["price"],
-                        item["stock"],
-                        item["weight"]
-                    )
+        print("Number of products in JSON:", len(data))
 
-                elif item["type"] == "digital":
-                    product = DigitalProduct(
-                        item["id"],
-                        item["name"],
-                        item["price"],
-                        item["stock"],
-                        item["download_size"]
-                    )
+        self.products = []
 
-                else:
-                    print("Unknown product type skipped.")
-                    continue
+        for item in data:
+            print("Loading product:", item["name"])
 
-                self.products.append(product)
+            if item["type"] == "physical":
+                product = PhysicalProduct(
+                    item["id"],
+                    item["name"],
+                    item["price"],
+                    item["stock"],
+                    item["weight"]
+                )
 
-            print("Inventory loaded successfully.")
+            elif item["type"] == "digital":
+                product = DigitalProduct(
+                    item["id"],
+                    item["name"],
+                    item["price"],
+                    item["stock"],
+                    item["download_size"]
+                )
 
-        except (OSError, ValueError, KeyError, TypeError) as error:
-            self.products = []
-            print(f"Error loading inventory: {error}")
+            else:
+                print("Unknown product type:", item["type"])
+                continue
+
+            self.products.append(product)
+
+        print("Products loaded:", len(self.products))
+
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        print("ERROR loading inventory:", error)

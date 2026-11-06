@@ -17,7 +17,7 @@ class DigitalProduct(Product):
     def to_dict(self):
         return {
             "type": "digital",
-            "product_id": self.product_id,
+            "id": self.product_id,
             "name": self.name,
             "price": self.price,
             "stock": self.stock,

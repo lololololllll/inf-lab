@@ -102,7 +102,6 @@ while True:
         inventory.save_inventory()
 
     elif choice == "6":
-        inventory.save_inventory()
         print("Exiting program.")
         break
 

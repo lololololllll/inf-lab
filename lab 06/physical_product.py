@@ -21,7 +21,7 @@ class PhysicalProduct(Product, CanBeShipped):
     def to_dict(self):
         return {
             "type": "physical",
-            "product_id": self.product_id,
+            "id": self.product_id,
             "name": self.name,
             "price": self.price,
             "stock": self.stock,
