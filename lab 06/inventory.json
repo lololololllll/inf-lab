@@ -1,32 +1,51 @@
+
 [
     {
+        "type": "physical",
         "id": "P001",
         "name": "Laptop",
         "price": 1200.0,
-        "stock": 15
+        "stock": 15,
+        "weight": 2.0
     },
     {
+        "type": "physical",
         "id": "P002",
         "name": "Mouse",
         "price": 25.5,
-        "stock": 40
+        "stock": 40,
+        "weight": 0.2
     },
     {
+        "type": "physical",
         "id": "P003",
         "name": "Keyboard",
         "price": 45.0,
-        "stock": 25
+        "stock": 25,
+        "weight": 0.8
     },
     {
+        "type": "physical",
         "id": "mousepad",
         "name": "mousepad",
         "price": 10.0,
-        "stock": 5
+        "stock": 5,
+        "weight": 0.3
     },
     {
+        "type": "physical",
         "id": "P005",
         "name": "Monitor",
         "price": 280.0,
-        "stock": 5
+        "stock": 5,
+        "weight": 4.5
+    },
+    {
+        "type": "digital",
+        "id": "D001",
+        "name": "Antivirus Software",
+        "price": 30.0,
+        "stock": 20,
+        "download_size": 500.0
     }
 ]
