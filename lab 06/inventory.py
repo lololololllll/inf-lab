@@ -71,11 +71,14 @@ class Inventory:
         try:
             with open(self.filename, "r") as file:
                 data = json.load(file)
+            print("Loading file:", os.path.abspath(self.filename))
+            print("JSON data:", data)
+            print("Number of products:", len(data))
 
             for item in data:
                 if item["type"] == "physical":
                     product = PhysicalProduct(
-                        item["product_id"],
+                        item["id"],
                         item["name"],
                         item["price"],
                         item["stock"],
@@ -84,7 +87,7 @@ class Inventory:
 
                 elif item["type"] == "digital":
                     product = DigitalProduct(
-                        item["product_id"],
+                        item["id"],
                         item["name"],
                         item["price"],
                         item["stock"],
