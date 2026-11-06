@@ -1,58 +1,104 @@
 
-from product import Product
 import json
+import os
+
+from physical_product import PhysicalProduct
+from digital_product import DigitalProduct
+
 
 class Inventory:
-    def __init__(self):
+    def __init__(self, filename="inventory.json"):
         self.products = []
+        self.filename = filename
+        self.load_inventory()
+
+    def display_all(self):
+        if not self.products:
+            print("Inventory is empty.")
+            return
+
+        for product in self.products:
+            print("--------------------")
+            product.display_information()
+            print(product.get_fulfilment_info())
+
+            if isinstance(product, PhysicalProduct):
+                print(
+                    f"Shipping Cost: "
+                    f"${product.calculate_shipping_cost():.2f}"
+                )
 
     def add_product(self, product):
+        if self.search_product(product.product_id) is not None:
+            print("Product ID already exists.")
+            return
+
         self.products.append(product)
         print("Product added successfully.")
 
     def search_product(self, product_id):
         for product in self.products:
-            if product.get_product_id() == product_id:
+            if product.product_id == product_id:
                 return product
         return None
 
-    def display_all(self):
-        if len(self.products) == 0:
-            print("Inventory is empty.")
-        else:
-            for product in self.products:
-                product.display_information()
+    def update_stock(self, product_id, quantity):
+        product = self.search_product(product_id)
 
-    # NEW: Load products from JSON
-    def load_inventory(self):
+        if product is None:
+            print("Product not found.")
+            return
+
+        if product.update_stock(quantity):
+            print("Stock updated successfully.")
+
+    def save_inventory(self):
+        data = [product.to_dict() for product in self.products]
+
         try:
-            with open("inventory.json", "r") as file:
+            with open(self.filename, "w") as file:
+                json.dump(data, file, indent=4)
+
+            print("Inventory saved successfully.")
+        except OSError as error:
+            print(f"Error saving inventory: {error}")
+
+    def load_inventory(self):
+        if not os.path.exists(self.filename):
+            print("No existing inventory file found.")
+            return
+
+        try:
+            with open(self.filename, "r") as file:
                 data = json.load(file)
 
-            self.products = []
-
             for item in data:
-                product = Product(
-                    item["id"],
-                    item["name"],
-                    item["price"],
-                    item["stock"]
-                )
+                if item["type"] == "physical":
+                    product = PhysicalProduct(
+                        item["product_id"],
+                        item["name"],
+                        item["price"],
+                        item["stock"],
+                        item["weight"]
+                    )
+
+                elif item["type"] == "digital":
+                    product = DigitalProduct(
+                        item["product_id"],
+                        item["name"],
+                        item["price"],
+                        item["stock"],
+                        item["download_size"]
+                    )
+
+                else:
+                    print("Unknown product type skipped.")
+                    continue
+
                 self.products.append(product)
 
             print("Inventory loaded successfully.")
 
-        except FileNotFoundError:
-            print("Inventory file not found.")
-
-    # NEW: Save products to JSON
-    def save_inventory(self):
-        data = []
-
-        for product in self.products:
-            data.append(product.to_dict())
-
-        with open("inventory.json", "w") as file:
-            json.dump(data, file, indent=4)
-
-        print("Inventory saved successfully.")
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            self.products = []
+            print(f"Error loading inventory: {error}")
