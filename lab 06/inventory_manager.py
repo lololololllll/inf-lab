@@ -1,9 +1,10 @@
 
-from product import Product
 from inventory import Inventory
+from physical_product import PhysicalProduct
+from digital_product import DigitalProduct
+
 
 inventory = Inventory()
-inventory.load_inventory()
 
 while True:
     print("\n===== INVENTORY MANAGEMENT SYSTEM =====")
@@ -20,55 +21,90 @@ while True:
         inventory.display_all()
 
     elif choice == "2":
-        product_id = input("Enter product ID: ")
-        name = input("Enter product name: ")
+        print("\n1. Physical Product")
+        print("2. Digital Product")
+
+        product_type = input("Choose product type: ")
+
+        if product_type not in ("1", "2"):
+            print("Invalid product type.")
+            continue
+
+        product_id = input("Enter Product ID: ")
+        name = input("Enter Product Name: ")
 
         try:
-            price = float(input("Enter price: "))
-            stock = int(input("Enter stock: "))
+            price = float(input("Enter Price: "))
+            stock = int(input("Enter Stock Quantity: "))
 
-            if inventory.search_product(product_id):
-                print("Product ID already exists.")
-
-            elif price < 0 or stock < 0:
+            if price < 0 or stock < 0:
                 print("Price and stock cannot be negative.")
+                continue
+
+            if product_type == "1":
+                weight = float(input("Enter Weight (kg): "))
+
+                if weight < 0:
+                    print("Weight cannot be negative.")
+                    continue
+
+                product = PhysicalProduct(
+                    product_id, name, price, stock, weight
+                )
 
             else:
-                product = Product(product_id, name, price, stock)
-                inventory.add_product(product)
+                download_size = float(
+                    input("Enter Download Size (MB): ")
+                )
+
+                if download_size < 0:
+                    print("Download size cannot be negative.")
+                    continue
+
+                product = DigitalProduct(
+                    product_id, name, price, stock, download_size
+                )
+
+            inventory.add_product(product)
 
         except ValueError:
-            print("Invalid price or stock.")
+            print("Invalid number entered.")
 
     elif choice == "3":
-        product_id = input("Enter product ID: ")
-        product = inventory.search_product(product_id)
+        product_id = input("Enter Product ID: ")
 
-        if product:
-            try:
-                quantity = int(input("Enter new stock: "))
-                product.update_stock(quantity)
-            except ValueError:
-                print("Please enter a valid number.")
-        else:
-            print("Product not found.")
+        try:
+            quantity = int(
+                input("Enter stock change (+ to add, - to remove): ")
+            )
+            inventory.update_stock(product_id, quantity)
+
+        except ValueError:
+            print("Invalid quantity.")
 
     elif choice == "4":
-        product_id = input("Enter product ID: ")
+        product_id = input("Enter Product ID: ")
         product = inventory.search_product(product_id)
 
         if product:
             product.display_information()
+            print(product.get_fulfilment_info())
+
+            if isinstance(product, PhysicalProduct):
+                print(
+                    f"Shipping Cost: "
+                    f"${product.calculate_shipping_cost():.2f}"
+                )
         else:
             print("Product not found.")
 
     elif choice == "5":
         inventory.save_inventory()
 
-        
     elif choice == "6":
+        inventory.save_inventory()
         print("Exiting program.")
         break
 
     else:
-        print("Invalid choice.")
+        print("Invalid choice. Please try again.")
