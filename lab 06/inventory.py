@@ -12,9 +12,13 @@ LEGACY_SUPPLIER = Supplier("UNASSIGNED", "Supplier not recorded", "")
 
 
 class Inventory:
-    def __init__(self, filename: str = "inventory.json") -> None:
+    def __init__(self, filename: str | None = None) -> None:
         self.products: list[Product] = []
-        self.filename: str = filename
+        self.filename: str = (
+            str(Path(__file__).with_name("inventory.json"))
+            if filename is None
+            else filename
+        )
         self.load_inventory()
 
     def display_all_products(self) -> None:
@@ -100,6 +104,6 @@ class Inventory:
                     print("Unknown product type:", item["type"])
             self.products = products
         except FileNotFoundError:
-            pass
+            print(f"Inventory file not found: {Path(self.filename).resolve()}")
         except (OSError, ValueError, KeyError, TypeError, AttributeError) as error:
             print("Error loading inventory:", error)
