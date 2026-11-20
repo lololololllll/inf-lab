@@ -2,8 +2,7 @@ import json
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
-from digital_product import DigitalProduct
-from physical_product import PhysicalProduct
+from product_factory import ProductFactory
 from product import Product, ProductRecord
 from supplier import Supplier
 
@@ -95,13 +94,11 @@ class Inventory:
                 supplier_data = item.get("supplier")
                 supplier = Supplier(**supplier_data) if supplier_data else LEGACY_SUPPLIER
                 supplier = suppliers.setdefault(supplier, supplier)
-                details = item["id"], item["name"], item["price"], item["stock"]
-                if item["type"] == "physical":
-                    products.append(PhysicalProduct(*details, item["weight"], supplier))
-                elif item["type"] == "digital":
-                    products.append(DigitalProduct(*details, item["download_size"], supplier))
-                else:
-                    print("Unknown product type:", item["type"])
+                products.append(ProductFactory.create(
+                    item["type"], item["id"], item["name"], item["price"],
+                    item["stock"], supplier, weight=item.get("weight", 0.0),
+                    download_size=item.get("download_size", 0.0),
+                ))
             self.products = products
         except FileNotFoundError:
             print(f"Inventory file not found: {Path(self.filename).resolve()}")

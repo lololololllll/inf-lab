@@ -1,7 +1,10 @@
-from digital_product import DigitalProduct
+from pathlib import Path
+from discount_strategy import NoDiscount, PercentageDiscount, BulkDiscount, StudentDiscount
+from product_factory import ProductFactory
+from product_loader import load_products
+from input_helpers import get_positive_float, get_integer
 from inventory import Inventory
 from order import Order
-from physical_product import PhysicalProduct
 from product import Product
 from supplier import Supplier
 
@@ -27,8 +30,8 @@ def add_product(inventory: Inventory) -> None:
         return
     product_id = input("Enter Product ID: ").strip()
     name = input("Enter Product Name: ").strip()
-    price = float(input("Enter Price: "))
-    stock = int(input("Enter Stock Quantity: "))
+    price = get_positive_float("Enter Price: ")
+    stock = get_integer("Enter Stock Quantity: ", 0)
     if price < 0 or stock < 0:
         raise ValueError("Price and stock cannot be negative.")
     product: Product
@@ -36,12 +39,12 @@ def add_product(inventory: Inventory) -> None:
         weight = float(input("Enter Weight (kg): "))
         if weight < 0:
             raise ValueError("Weight cannot be negative.")
-        product = PhysicalProduct(product_id, name, price, stock, weight, read_supplier(inventory))
+        product = ProductFactory.create("physical", product_id, name, price, stock, read_supplier(inventory), weight=weight)
     else:
         size = float(input("Enter Download Size (MB): "))
         if size < 0:
             raise ValueError("Download size cannot be negative.")
-        product = DigitalProduct(product_id, name, price, stock, size, read_supplier(inventory))
+        product = ProductFactory.create("digital", product_id, name, price, stock, read_supplier(inventory), download_size=size)
     inventory.add_product(product)
 
 
@@ -53,9 +56,17 @@ def build_order(inventory: Inventory) -> None:
             print("Product not found.")
             continue
         try:
-            order.add_order_line(product, int(input("Enter Quantity: ")))
+            order.add_order_line(product, get_integer("Enter Quantity: ", 1))
         except ValueError as error:
             print(error)
+    strategies = {"1": NoDiscount(), "2": PercentageDiscount(10),
+                  "3": BulkDiscount(200, 20), "4": StudentDiscount()}
+    while True:
+        choice = input("Discount: 1 None / 2 Ten percent / 3 Bulk / 4 Student: ")
+        if choice in strategies:
+            order.set_discount(strategies[choice])
+            break
+        print("Invalid discount choice.")
     print(f"Order {order.order_id}")
     for line in order.order_lines:
         print(f"{line.product.name} x {line.quantity}: ${line.calculate_subtotal():.2f}")
@@ -69,7 +80,7 @@ def main() -> None:
             "\n===== INVENTORY MANAGEMENT SYSTEM =====\n"
             "1. Display all products\n2. Add product\n3. Update stock\n"
             "4. Search product\n5. Save inventory\n6. Exit\n"
-            "7. Remove product\n8. Calculate order total"
+            "7. Remove product\n8. Calculate order total\n9. Load products from CSV"
         )
         choice = input("Enter your choice: ")
         try:
@@ -98,6 +109,11 @@ def main() -> None:
                 inventory.remove_product(input("Enter Product ID: "))
             elif choice == "8":
                 build_order(inventory)
+            elif choice == "9":
+                path = input("CSV path (blank for products.csv): ").strip()
+                path = path or str(Path(__file__).with_name("products.csv"))
+                supplier = Supplier("CSV", "CSV Supplier", "csv@example.com")
+                load_products(path, inventory, supplier)
             else:
                 print("Invalid choice. Please try again.")
         except ValueError as error:
