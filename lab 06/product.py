@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from math import isfinite
 from typing import NotRequired, TypedDict
 
 from supplier import Supplier, SupplierRecord
@@ -21,9 +22,29 @@ class Product(ABC):
     ) -> None:
         self.product_id: str = product_id
         self.name: str = name
-        self.price: float = price
-        self.stock: int = stock
+        self.price = price
+        self.stock = stock
         self.supplier: Supplier = supplier
+
+    @property
+    def price(self) -> float:
+        return self._price
+
+    @price.setter
+    def price(self, value: float) -> None:
+        if not isfinite(value) or value <= 0:
+            raise ValueError("Price must be a finite number greater than zero.")
+        self._price = value
+
+    @property
+    def stock(self) -> int:
+        return self._stock
+
+    @stock.setter
+    def stock(self, value: int) -> None:
+        if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+            raise ValueError("Stock quantity must be a non-negative integer.")
+        self._stock = value
 
     def update_stock(self, quantity: int) -> bool:
         if self.stock + quantity < 0:
